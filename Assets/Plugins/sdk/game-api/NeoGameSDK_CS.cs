@@ -30,6 +30,23 @@ public class NeoGameSDK_CS
         go_login.SetActive(true);
     }
 
+    static public void recharge(Action<bool, WWW> func_cmd, string to_adress, float num)
+    {
+        string[] array = { "(addr)" + roleInfo.getInstance().address, "(addr)" + to_adress, "(int)" + num* 100000000 };
+        sdk_http._instance.api_post_cmd(func_cmd, global.id_sgas, "sendrawtransaction", "transfer", array);
+    }
+
+    static public void postMessagge(Action<bool, WWW> func_cmd, string ids, string cmd, string main, string[] arry = null)
+    {
+        sdk_http._instance.api_post_cmd(func_cmd, ids, cmd, main, arry);
+        //switch (cmd)
+        //{
+        //    case "invokescript":
+
+        //        break;
+
+        //}
+    }
 
     //后续添加在链上的操作
 }
