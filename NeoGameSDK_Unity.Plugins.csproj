@@ -101,6 +101,7 @@
     <Compile Include="Assets\Plugins\sdk\neo-thin\thinneo\TransAction.cs" />
     <Compile Include="Assets\Plugins\sdk\ui\basePanel.cs" />
     <Compile Include="Assets\Plugins\sdk\ui\ui_bindwallet.cs" />
+    <Compile Include="Assets\Plugins\sdk\ui\ui_addressCode.cs" />
     <Compile Include="Assets\Plugins\sdk\ui\ui_roleinfo.cs" />
     <Compile Include="Assets\Plugins\sdk\ui\ui_notice.cs" />
     <Compile Include="Assets\Plugins\sdk\ui\ui_main.cs" />

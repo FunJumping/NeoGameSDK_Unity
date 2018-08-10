@@ -38,7 +38,8 @@ public class ui_walletPassword : basePanel
             testtool.panel_login.hide();
             hide();
             testtool.panel_main.show();
-            testtool.panel_main.on_refresh_info();
+            testtool.panel_main.on_refresh_WalletListss();
+            testtool.panel_main.on_refresh_plat_NotifyList();
             roleInfo.getInstance().logined_cb();
             sdk_http._instance.get_main_info();
         }

@@ -15,6 +15,7 @@ public class testtool : MonoBehaviour
     static public ui_main panel_main;
     static public ui_notice panel_notice;
     static public ui_roleinfo panel_roleinfo;
+    static public ui_addressCode panel_address_code;
 
     static Text txt_notcie;
 
@@ -32,6 +33,7 @@ public class testtool : MonoBehaviour
         panel_main = new ui_main(this.transform.FindChild("main_ui/main"));
         panel_notice = new ui_notice(this.transform.FindChild("main_ui/notice"));
         panel_roleinfo = new ui_roleinfo(this.transform.FindChild("main_ui/roleinfo"));
+        panel_address_code = new ui_addressCode(this.transform.FindChild("main_ui/adressCode"));
 
         btn_main = this.transform.FindChild("btn_main").GetComponent<Button>();
         btn_main.onClick.AddListener(onMainPanelCtr);
@@ -57,7 +59,7 @@ public class testtool : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        panel_main.Update();
     }
 
     static public void on_error_notice(int code)

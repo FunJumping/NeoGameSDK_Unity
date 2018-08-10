@@ -11,4 +11,5 @@ static public class global
     //static public string id_sgas = "0x3f7420285874867c30f32e44f304fd62ad1e9573";
     static public string id_sgas = "0x2761020e5e6dfcd8d37fdd50ff98fa0f93bccf54";
     static public int game_id = 7;
+    static public int netType = 2;  //2为测试网
 }

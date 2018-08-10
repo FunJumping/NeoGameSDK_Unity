@@ -53,21 +53,6 @@ public class test : MonoBehaviour {
     void api_cb_cmd(bool timeout, WWW www)
     {
         Debug.Log(www.text);
-
-        //var json = MyJson.Parse(www.text);
-        //var resultv = json.AsDict()["result"].AsList()[0].AsDict()["stack"].AsList()[0].AsDict();
-        //var rtype = resultv["type"].AsString();
-        //var rvalue = resultv["value"].AsString();
-        //if (rvalue != "")
-        //{
-        //    var n = new BigMath.Numerics.BigInteger(ThinNeo.Helper.HexString2Bytes(rvalue));
-        //    Debug.Log(decimal.Parse((float.Parse(n.ToString()) / 100000000).ToString()));
-        //}
-
-        //var json = MyJson.Parse(www.text);
-        //var txid = json.AsDict()["result"].AsList()[0].AsDict()["txid"].AsString();
-        //string[] array = { "(addr)" + roleInfo.getInstance().address, "(str)" + txid };
-        //NeoGameSDK_CS.postMessagge(api_cb2, "0x7753e79cfb98e63e2b7aa00a819e0cb86fdb1930", "sendrawtransaction", "rechargeToken", array);
     }
     void api_cb2(bool timeout, WWW www)
     {

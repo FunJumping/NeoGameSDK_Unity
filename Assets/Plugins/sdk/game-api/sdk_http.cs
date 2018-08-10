@@ -173,93 +173,36 @@ public class sdk_http : MonoBehaviour
         testtool.panel_main.on_refresh_info();
     }
 
-    decimal m_num;
-    string m_paparms;
-    string m_cur_txid;
-    public void recharge_sgas(decimal num)
+    public void transform_gas_sgas(decimal num)
     {
-        StartCoroutine(HTTP_nel_post_gas_sgas(num, on_recharge_gas));
+        StartCoroutine(HTTP_nel_post_gas_sgas(num));
     }
 
     public void transform_gas(string adrr, decimal num)
     {
-        StartCoroutine(HTTP_nel_post_tan_gas(adrr, num, on_transaction_gas));
+        StartCoroutine(HTTP_nel_post_tan_gas(adrr, num));
+    }
+
+    public void transform_sgas_gas(decimal num)
+    {
+        StartCoroutine(HTTP_nel_post_sgas_gas(num));
+    }
+
+    public void transform_sgas_gas2(MyJson.IJsonNode json_complete)
+    {
+        StartCoroutine(HTTP_nel_post_sgas_gas2(json_complete));
     }
 
     public void recharge_game_sgas(decimal num)
     {
-        m_num = num;
-        StartCoroutine(HTTP_nel_post_tan_sgas( num, on_transaction_game_gas));
+        StartCoroutine(HTTP_nel_post_tan_sgas(num));
     }
 
-    private void on_transaction_game_gas(bool timeout, WWW www)
+    public void getrawtransaction(string txid, Action<bool, WWW> call_back)
     {
-        var json = MyJson.Parse(www.text).AsDict();
-
-        if (json.ContainsKey("result"))
-        {
-            var resultv = json["result"].AsList()[0].AsDict();
-            var txid = resultv["txid"].AsString();
-            if (txid.Length > 0)
-            {
-                Debug.Log("txid=" + txid);
-
-                api_tool._instance.addUserWalletLogs(roleInfo.getInstance().uid,roleInfo.getInstance().token, txid,
-                    global.game_id.ToString(), m_num.ToString(), "3", m_paparms, 2, "0", null);
-            }
-            else
-            {
-                Debug.Log("交易失败");
-            }
-        }
-        else
-        {
-            Debug.Log("交易失败");
-        }
+        WWWForm www_form = Helper.GetWWWFormPost("getrawtransaction", new MyJson.JsonNode_ValueString(txid));
+        StartCoroutine(HTTP_nel_post_timeCircle(www_form, call_back));
     }
-   
-
-    private void on_recharge_gas(bool timeout, WWW www)
-    {
-        var json = MyJson.Parse(www.text).AsDict();
-
-        if (json.ContainsKey("result"))
-        {
-            var resultv = json["result"].AsList()[0].AsDict();
-            var txid = resultv["txid"].AsString();
-            if (txid.Length > 0)
-            {
-                //Nep55_1.lastNep5Tran = tran.GetHash();
-            }
-            Debug.Log("txid=" + txid);
-        }
-        else
-        {
-            Debug.Log("交易失败");
-            //testtool.showNotice("交易失败");
-        }
-    }
-    private void on_transaction_gas(bool timeout, WWW www)
-    {
-        var json = MyJson.Parse(www.text).AsDict();
-
-        if (json.ContainsKey("result"))
-        {
-            var resultv = json["result"].AsList()[0].AsDict();
-            var txid = resultv["txid"].AsString();
-            if (txid.Length > 0)
-            {
-                //Nep55_1.lastNep5Tran = tran.GetHash();
-            }
-            Debug.Log("txid=" + txid);
-        }
-        else
-        {
-            Debug.Log("交易失败");
-            //testtool.showNotice("交易失败");
-        }
-    }
-
 
 
     private void on_get_balance(bool timeout, WWW www)
@@ -288,23 +231,34 @@ public class sdk_http : MonoBehaviour
         //get_allnep5assetofaddres();
     }
 
-    IEnumerator HTTP_post(string url, WWWForm www_form, Action<bool, WWW> call_back) //请求黑猫后台
+    IEnumerator HTTP_nel_post_timeCircle(WWWForm www_form, Action<bool, WWW> call_back)
     {
-        WWW www = new WWW(m_lancfg_hostUrl + url, www_form);
+        float timer = 11;
 
-        float timer = 0;
-        bool time_out = false;
-        while (!www.isDone)
+        while (true)
         {
-            if (timer > 30f) { time_out = true; break; }
+            if (timer > 10f)
+            {
+                WWW www = new WWW(global.api, www_form);
+                yield return www;
+                Debug.Log(www.text);
+                bool time_out = false;
+                var json = MyJson.Parse(www.text).AsDict();
+
+                if (json.ContainsKey("result"))
+                {
+                    if (call_back != null)
+                        call_back(time_out, www);
+                    break;
+                }
+                else
+                {
+                    timer = 0;
+                }
+            }
             timer += Time.deltaTime;
             yield return null;
         }
-
-        call_back(time_out, www);
-
-        www.Dispose();
-        www = null;
     }
 
     IEnumerator HTTP_nel_post(WWWForm www_form, Action<bool, WWW> call_back) //请求nel后台
@@ -360,7 +314,7 @@ public class sdk_http : MonoBehaviour
         StartCoroutine(HTTP_nel_post(www_form_sendraw, call_back));
     }
 
-    IEnumerator HTTP_nel_post_tan_gas(string toaddr, decimal num, Action<bool, WWW> call_back)
+    IEnumerator HTTP_nel_post_tan_gas(string toaddr, decimal num)
     {
         WWWForm www_getuxo_form = Helper.GetWWWFormPost("getutxo", new MyJson.JsonNode_ValueString(roleInfo.getInstance().address));
         WWW www = new WWW(global.api, www_getuxo_form);
@@ -374,6 +328,16 @@ public class sdk_http : MonoBehaviour
             yield return null;
         }
 
+        string paparms;
+
+        //拼接发给后台做验证的json字符串
+        MyJson.JsonNode_Object account = new MyJson.JsonNode_Object();
+        account["sbPushString"] = new MyJson.JsonNode_ValueString("transfer");
+        account["cnts"] = new MyJson.JsonNode_ValueString(num.ToString());
+
+        paparms = account.ToString();
+        Debug.Log(paparms);
+
         ThinNeo.Transaction tran = null;
         {
             tran = Helper.makeTran(_dir[global.id_GAS], toaddr, new ThinNeo.Hash256(global.id_GAS), num);
@@ -386,10 +350,33 @@ public class sdk_http : MonoBehaviour
         var strtrandata = ThinNeo.Helper.Bytes2HexString(trandata);
 
         WWWForm www_form_sendraw = Helper.GetWWWFormPost("sendrawtransaction", new MyJson.JsonNode_ValueString(strtrandata));
-        StartCoroutine(HTTP_nel_post(www_form_sendraw, call_back));
+        WWW sendraw = new WWW(global.api, www_form_sendraw);
+        yield return sendraw;
+
+        var json = MyJson.Parse(sendraw.text).AsDict();
+
+        if (json.ContainsKey("result"))
+        {
+            var resultv = json["result"].AsList()[0].AsDict();
+            var txid = resultv["txid"].AsString();
+            if (txid.Length > 0)
+            {
+                //Nep55_1.lastNep5Tran = tran.GetHash();
+            }
+            Debug.Log("txid=" + txid);
+
+            api_tool._instance.addUserWalletLogs(roleInfo.getInstance().uid, roleInfo.getInstance().token, txid,
+                  "0", num.ToString(), "6", paparms, global.netType, "0",
+                  (bool timeout1, WWW www1) => { testtool.panel_main.on_refresh_WalletListss(); });
+        }
+        else
+        {
+            Debug.Log("交易失败");
+            //testtool.showNotice("交易失败");
+        }
     }
 
-    IEnumerator HTTP_nel_post_tan_sgas(decimal num, Action<bool, WWW> call_back)
+    IEnumerator HTTP_nel_post_tan_sgas(decimal num)
     {
         WWWForm www_getuxo_form = Helper.GetWWWFormPost("getutxo", new MyJson.JsonNode_ValueString(roleInfo.getInstance().address));
         WWW www = new WWW(global.api, www_getuxo_form);
@@ -401,6 +388,9 @@ public class sdk_http : MonoBehaviour
         {
             Debug.Log("no gas");
         }
+
+        string paparms;
+
         ThinNeo.Transaction tran = null;
         {
 
@@ -410,7 +400,7 @@ public class sdk_http : MonoBehaviour
                 var array = new MyJson.JsonNode_Array();
                 array.AddArrayValue("(addr)" + roleInfo.getInstance().address);//from
                 array.AddArrayValue("(addr)" + global.cp_adress);//to
-                array.AddArrayValue("(int)" + (m_num * 100000000));//value
+                array.AddArrayValue("(int)" + (num * 100000000));//value
 
                 sb.EmitParamJson(array);//参数倒序入
                 sb.EmitParamJson(new MyJson.JsonNode_ValueString("(str)transfer"));//参数倒序入
@@ -420,13 +410,13 @@ public class sdk_http : MonoBehaviour
                 //拼接发给后台做验证的json字符串
                 MyJson.JsonNode_Object account = new MyJson.JsonNode_Object();
                 account["sbParamJson"] = array;
-                account["sbPushString"] = new MyJson.JsonNode_ValueString("(str)transfer");
+                account["sbPushString"] = new MyJson.JsonNode_ValueString("transfer");
                 account["nnc"] = new MyJson.JsonNode_ValueString(global.id_sgas);
+                account["cnts"] = new MyJson.JsonNode_ValueString(num.ToString());
+                paparms = account.ToString();
+
 
                 script = sb.ToArray();
-
-                m_paparms = account.ToString();
-                Debug.Log(m_paparms);
             }
 
             tran = Helper.makeTran(_dir[global.id_GAS], roleInfo.getInstance().address, new ThinNeo.Hash256(global.id_GAS), 0);
@@ -444,10 +434,35 @@ public class sdk_http : MonoBehaviour
         var strtrandata = ThinNeo.Helper.Bytes2HexString(trandata);
 
         WWWForm www_form_sendraw = Helper.GetWWWFormPost("sendrawtransaction", new MyJson.JsonNode_ValueString(strtrandata));
-        StartCoroutine(HTTP_nel_post(www_form_sendraw, call_back));
+        WWW sendraw = new WWW(global.api, www_form_sendraw);
+        yield return sendraw;
+
+        var json = MyJson.Parse(sendraw.text).AsDict();
+
+        if (json.ContainsKey("result"))
+        {
+            var resultv = json["result"].AsList()[0].AsDict();
+            var txid = resultv["txid"].AsString();
+            if (txid.Length > 0)
+            {
+                Debug.Log("txid=" + txid);
+
+                api_tool._instance.addUserWalletLogs(roleInfo.getInstance().uid, roleInfo.getInstance().token, txid,
+                    global.game_id.ToString(), num.ToString(), "3", paparms, global.netType, "0",
+                    (bool timeout1, WWW www1) => { testtool.panel_main.on_refresh_WalletListss(); });
+            }
+            else
+            {
+                Debug.Log("交易失败");
+            }
+        }
+        else
+        {
+            Debug.Log("交易失败");
+        }
     }
 
-    IEnumerator HTTP_nel_post_gas_sgas(decimal num, Action<bool, WWW> call_back)
+    IEnumerator HTTP_nel_post_gas_sgas(decimal num)
     {
         WWWForm www_getuxo_form = Helper.GetWWWFormPost("getutxo", new MyJson.JsonNode_ValueString(roleInfo.getInstance().address));
         WWW www = new WWW(global.api, www_getuxo_form);
@@ -459,6 +474,9 @@ public class sdk_http : MonoBehaviour
         {
             Debug.Log("no gas");
         }
+
+        string paparms;
+
         ThinNeo.Transaction tran = null;
         {
             byte[] script = null;
@@ -470,10 +488,21 @@ public class sdk_http : MonoBehaviour
                 ThinNeo.Hash160 shash = new ThinNeo.Hash160(global.id_sgas);
                 sb.EmitAppCall(shash);//nep5脚本
                 script = sb.ToArray();
+
+                //拼接发给后台做验证的json字符串
+                MyJson.JsonNode_Object account = new MyJson.JsonNode_Object();
+                account["sbParamJson"] = array;
+                account["sbPushString"] = new MyJson.JsonNode_ValueString("mintTokens");
+                account["nnc"] = new MyJson.JsonNode_ValueString(global.id_sgas);
+                account["cnts"] = new MyJson.JsonNode_ValueString(num.ToString());
+                paparms = account.ToString();
+                Debug.Log(paparms);
             }
             var nep5scripthash = new ThinNeo.Hash160(global.id_sgas);
             var targetaddr = ThinNeo.Helper.GetAddressFromScriptHash(nep5scripthash);
             Debug.Log("contract address=" + targetaddr);//往合约地址转账
+
+         
 
             //生成交易
             tran = Helper.makeTran(_dir[global.id_GAS], targetaddr, new ThinNeo.Hash256(global.id_GAS), num);
@@ -490,9 +519,327 @@ public class sdk_http : MonoBehaviour
         var strtrandata = ThinNeo.Helper.Bytes2HexString(trandata);
 
         WWWForm www_form_sendraw = Helper.GetWWWFormPost("sendrawtransaction", new MyJson.JsonNode_ValueString(strtrandata));
-        StartCoroutine(HTTP_nel_post(www_form_sendraw, call_back));
+        WWW sendraw = new WWW(global.api, www_form_sendraw);
+        yield return sendraw;
+
+        var json = MyJson.Parse(sendraw.text).AsDict();
+
+        if (json.ContainsKey("result"))
+        {
+            var resultv = json["result"].AsList()[0].AsDict();
+            var txid = resultv["txid"].AsString();
+            if (txid.Length > 0)
+            {
+                Debug.Log("txid=" + txid);
+
+                api_tool._instance.addUserWalletLogs(roleInfo.getInstance().uid, roleInfo.getInstance().token, txid,
+                    "0", num.ToString(), "1", paparms, global.netType, "0",
+                     (bool timeout1, WWW www1) => { testtool.panel_main.on_refresh_WalletListss(); });
+            }
+            else
+            {
+                Debug.Log("交易失败");
+            }
+        }
+        else
+        {
+            Debug.Log("交易失败");
+        }
     }
 
+
+    IEnumerator HTTP_nel_post_sgas_gas(decimal num)
+    {
+        var nep55_shash = new ThinNeo.Hash160(global.id_sgas);
+        string nep55_address = ThinNeo.Helper.GetAddressFromScriptHash(nep55_shash);
+
+        WWWForm www_getuxo_form = Helper.GetWWWFormPost("getutxo", new MyJson.JsonNode_ValueString(nep55_address));
+        WWW www = new WWW(global.api, www_getuxo_form);
+        yield return www;
+
+        Dictionary<string, List<Utxo>> _dir = get_utxo(www.text);
+
+        if (_dir.ContainsKey(global.id_GAS) == false)
+        {
+            Debug.Log("no gas");
+        }
+
+        List<Utxo> newlist = new List<Utxo>(_dir[global.id_GAS]);
+        for (var i = newlist.Count - 1; i >= 0; i--)
+        {
+            Debug.Log(newlist[i].txid.ToString());
+            
+            byte[] script = null;
+            using (var sb = new ThinNeo.ScriptBuilder())
+            {
+                var array = new MyJson.JsonNode_Array();
+                array.AddArrayValue("(hex256)" + newlist[i].txid.ToString());
+                sb.EmitParamJson(array);//参数倒序入
+                sb.EmitParamJson(new MyJson.JsonNode_ValueString("(str)getRefundTarget"));//参数倒序入
+                var shash = new ThinNeo.Hash160(global.id_sgas);
+                sb.EmitAppCall(shash);//nep5脚本
+                script = sb.ToArray();
+            }
+            if (newlist[i].n > 0)
+                continue;
+
+            WWWForm www_getTarget_form = Helper.GetWWWFormPost("invokescript", new MyJson.JsonNode_ValueString(ThinNeo.Helper.Bytes2HexString(script)));
+            WWW www_form = new WWW(global.api, www_getTarget_form);
+
+            yield return www_form;
+            var jsonCU = MyJson.Parse(www_form.text);
+            var stack = jsonCU.AsDict()["result"].AsList()[0].AsDict()["stack"].AsList()[0].AsDict();
+            var value = stack["value"].AsString();
+            if (value.Length > 0)//已经标记的UTXO，不能使用
+            {
+                newlist.RemoveAt(i);
+            }
+        }
+
+        string paparms;
+
+        ThinNeo.Transaction tran = null;
+        {
+            byte[] script = null;
+            using (var sb = new ThinNeo.ScriptBuilder())
+            {
+                var array = new MyJson.JsonNode_Array();
+                array.AddArrayValue("(bytes)" + ThinNeo.Helper.Bytes2HexString(roleInfo.getInstance().scripthash));
+                sb.EmitParamJson(array);//参数倒序入
+                sb.EmitParamJson(new MyJson.JsonNode_ValueString("(str)refund"));//参数倒序入
+                var shash = new ThinNeo.Hash160(global.id_sgas);
+                sb.EmitAppCall(shash);//nep5脚本
+                script = sb.ToArray();
+
+
+                //拼接发给后台做验证的json字符串
+                MyJson.JsonNode_Object account = new MyJson.JsonNode_Object();
+                account["sbParamJson"] = array;
+                account["sbPushString"] = new MyJson.JsonNode_ValueString("refund");
+                account["nnc"] = new MyJson.JsonNode_ValueString(global.id_sgas);
+                account["cnts"] = new MyJson.JsonNode_ValueString(num.ToString());
+                paparms = account.ToString();
+
+            }
+
+            //生成交易
+            tran = Helper.makeTran(newlist, nep55_address, new ThinNeo.Hash256(global.id_GAS), num);
+            tran.type = ThinNeo.TransactionType.InvocationTransaction;
+            var idata = new ThinNeo.InvokeTransData();
+            tran.extdata = idata;
+            idata.script = script;
+
+            //附加鉴证
+            tran.attributes = new ThinNeo.Attribute[1];
+            tran.attributes[0] = new ThinNeo.Attribute();
+            tran.attributes[0].usage = ThinNeo.TransactionAttributeUsage.Script;
+            tran.attributes[0].data = roleInfo.getInstance().scripthash;
+        }
+
+        //sign and broadcast
+        {//做智能合约的签名
+            byte[] n55contract = null;
+            {
+                WWWForm www_getState = Helper.GetWWWFormPost("getcontractstate", new MyJson.JsonNode_ValueString(global.id_sgas));
+                WWW www_state = new WWW(global.api, www_getState);
+
+                yield return www_state;
+
+                var _json = MyJson.Parse(www_state.text).AsDict();
+                var _resultv = _json["result"].AsList()[0].AsDict();
+                n55contract = ThinNeo.Helper.HexString2Bytes(_resultv["script"].AsString());
+            }
+            byte[] iscript = null;
+            using (var sb = new ThinNeo.ScriptBuilder())
+            {
+                sb.EmitPushString("whatever");
+                sb.EmitPushNumber(250);
+                iscript = sb.ToArray();
+            }
+            tran.AddWitnessScript(n55contract, iscript);
+        }
+        {//做提款人的签名
+            var signdata = ThinNeo.Helper.Sign(tran.GetMessage(), roleInfo.getInstance().prikey);
+            tran.AddWitness(signdata, roleInfo.getInstance().pubkey, roleInfo.getInstance().address);
+        }
+        var trandata = tran.GetRawData();
+        var strtrandata = ThinNeo.Helper.Bytes2HexString(trandata);
+
+        ThinNeo.Transaction testde = new ThinNeo.Transaction();
+        testde.Deserialize(new System.IO.MemoryStream(trandata));
+
+        WWWForm www_transaction = Helper.GetWWWFormPost("sendrawtransaction", new MyJson.JsonNode_ValueString(strtrandata));
+        WWW www_tran = new WWW(global.api, www_transaction);
+
+        yield return www_tran;
+
+
+        Debug.Log(www_tran.text);
+
+        var json = MyJson.Parse(www_tran.text).AsDict();
+
+        ThinNeo.Hash256 lasttxid = null;
+        if (json.ContainsKey("result"))
+        {
+            bool bSucc = false;
+            if (json["result"].type == MyJson.jsontype.Value_Number)
+            {
+                bSucc = json["result"].AsBool();
+                Debug.Log("cli=" + json["result"].ToString());
+            }
+            else
+            {
+                var resultv = json["result"].AsList()[0].AsDict();
+                var txid = resultv["txid"].AsString();
+                bSucc = txid.Length > 0;
+            }
+            if (bSucc)
+            {
+                lasttxid = tran.GetHash();
+                Debug.Log("你可以从这个UTXO拿走GAS了 txid=" + lasttxid.ToString() + "[0]");
+
+                api_tool._instance.addUserWalletLogs(roleInfo.getInstance().uid, roleInfo.getInstance().token, lasttxid.ToString(),
+                   "0", num.ToString(), "2", paparms, global.netType, "0",
+                    (bool timeout1, WWW www1) => { testtool.panel_main.on_refresh_WalletListss(); testtool.panel_main.on_refresh_plat_NotifyList(); });
+            }
+            else
+            {
+                lasttxid = null;
+            }
+        }
+
+       
+    }
+
+    IEnumerator HTTP_nel_post_sgas_gas2(MyJson.IJsonNode json_complete)
+    {
+        string txid = json_complete.AsDict()["txid"].ToString();
+
+        var nep55_shash = new ThinNeo.Hash160(global.id_sgas);
+        string nep55_address = ThinNeo.Helper.GetAddressFromScriptHash(nep55_shash);
+
+        WWWForm www_getuxo_form_2 = Helper.GetWWWFormPost("getutxo", new MyJson.JsonNode_ValueString(nep55_address));
+        WWW www_utxo_2 = new WWW(global.api, www_getuxo_form_2);
+        yield return www_utxo_2;
+
+        Dictionary<string, List<Utxo>> _dir_2 = get_utxo(www_utxo_2.text);
+
+        if (_dir_2.ContainsKey(global.id_GAS) == false)
+        {
+            Debug.Log("no gas");
+        }
+
+        List<Utxo> newlist_2 = new List<Utxo>();
+        foreach (var utxo in _dir_2[global.id_GAS])
+        {
+            if (utxo.n == 0 && utxo.txid.ToString().Equals(txid))
+                newlist_2.Add(utxo);
+        }
+        if (newlist_2.Count == 0)
+        {
+            Debug.Log("找不到要使用的UTXO");
+            yield return null;
+        }
+
+        {//检查utxo
+            byte[] script = null;
+            using (var sb = new ThinNeo.ScriptBuilder())
+            {
+                var array = new MyJson.JsonNode_Array();
+                array.AddArrayValue("(hex256)" + newlist_2[0].txid.ToString());
+                sb.EmitParamJson(array);//参数倒序入
+                sb.EmitParamJson(new MyJson.JsonNode_ValueString("(str)getRefundTarget"));//参数倒序入
+                var shash = new ThinNeo.Hash160(global.id_sgas);
+                sb.EmitAppCall(shash);//nep5脚本
+                script = sb.ToArray();
+            }
+
+            WWWForm www_getTarget_form = Helper.GetWWWFormPost("invokescript", new MyJson.JsonNode_ValueString(ThinNeo.Helper.Bytes2HexString(script)));
+            WWW www_form = new WWW(global.api, www_getTarget_form);
+            yield return www_form;
+
+            var jsonCU = MyJson.Parse(www_form.text);
+            var stack = jsonCU.AsDict()["result"].AsList()[0].AsDict()["stack"].AsList()[0].AsDict();
+            var value = stack["value"].AsString();
+            if (value.Length == 0)//未标记的UTXO，不能使用
+            {
+                Debug.Log("这个utxo没有标记");
+                yield return null;
+            }
+            
+            var hash = new ThinNeo.Hash160(ThinNeo.Helper.HexString2Bytes(value));
+            if (hash.ToString() != ThinNeo.Helper.GetPublicKeyHashFromAddress(roleInfo.getInstance().address).ToString())
+            {
+                Debug.Log("这个utxo不是标记给你用的");
+                Debug.Log(hash.ToString());
+                Debug.Log(ThinNeo.Helper.Bytes2HexString(roleInfo.getInstance().scripthash));
+                yield return null;
+            }
+        }
+
+
+        ThinNeo.Transaction tran_2 = Helper.makeTran(newlist_2, roleInfo.getInstance().address, new ThinNeo.Hash256(global.id_GAS), newlist_2[0].value);
+        tran_2.type = ThinNeo.TransactionType.ContractTransaction;
+        tran_2.version = 0;
+
+        //sign and broadcast
+        {//做智能合约的签名
+            byte[] n55contract = null;
+            {
+                WWWForm www_getState = Helper.GetWWWFormPost("getcontractstate", new MyJson.JsonNode_ValueString(global.id_sgas));
+                WWW www_state = new WWW(global.api, www_getState);
+                yield return www_state;
+
+                var _json = MyJson.Parse(www_state.text).AsDict();
+                var _resultv = _json["result"].AsList()[0].AsDict();
+                n55contract = ThinNeo.Helper.HexString2Bytes(_resultv["script"].AsString());
+            }
+            byte[] iscript = null;
+            using (var sb = new ThinNeo.ScriptBuilder())
+            {
+                sb.EmitPushNumber(0);
+                sb.EmitPushNumber(0);
+                iscript = sb.ToArray();
+            }
+            tran_2.AddWitnessScript(n55contract, iscript);
+        }
+
+
+        var trandata_2 = tran_2.GetRawData();
+        var strtrandata_2 = ThinNeo.Helper.Bytes2HexString(trandata_2);
+
+        ThinNeo.Transaction testde_2 = new ThinNeo.Transaction();
+        testde_2.Deserialize(new System.IO.MemoryStream(trandata_2));
+
+        WWWForm www_transaction_2 = Helper.GetWWWFormPost("sendrawtransaction", new MyJson.JsonNode_ValueString(strtrandata_2));
+        WWW www_tran_2 = new WWW(global.api, www_transaction_2);
+
+        yield return www_tran_2;
+
+        Debug.Log(www_tran_2.text);
+
+        var json_2 = MyJson.Parse(www_tran_2.text).AsDict();
+
+        if (json_2.ContainsKey("result"))
+        {
+            var resultv = json_2["result"].AsList()[0].AsDict();
+            var ext = resultv["txid"].AsString();
+            if (txid.Length > 0)
+            {
+                Debug.Log("txid=" + ext);
+                testtool.panel_main.do_plat_notify(json_complete, ext);
+                api_tool._instance.walletNotifyExt(roleInfo.getInstance().uid, roleInfo.getInstance().token, txid, ext, global.netType, null);
+            }
+            else
+            {
+                Debug.Log("交易失败");
+            }
+        }
+        else
+        {
+            Debug.Log("交易失败");
+        }
+    }
 
     public Dictionary<string, List<Utxo>> get_utxo(string txt)
     {

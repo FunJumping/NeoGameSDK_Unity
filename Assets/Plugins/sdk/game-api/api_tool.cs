@@ -143,18 +143,79 @@ public class api_tool : MonoBehaviour
     {
         WWWForm www_form = new WWWForm();
         www_form.AddField("cmd", "user_wallet.logss");
-        www_form.AddField("uid", roleInfo.getInstance().uid);
-        www_form.AddField("token", roleInfo.getInstance().token);
+        www_form.AddField("uid", uid);
+        www_form.AddField("token", token);
         www_form.AddField("txid", txid);
-        www_form.AddField("g_id", global.game_id);
+        www_form.AddField("g_id", g_id);
         www_form.AddField("cnts", cnts);
         www_form.AddField("type", type);
         www_form.AddField("params", pparams);
         www_form.AddField("net_type", net_type);
         www_form.AddField("trust", trust);
-        Debug.Log(www_form.ToString());
         StartCoroutine(HTTP_post("/apic_user.php", www_form, call_back));
     }
+
+    public void getWalletListss(string uid, string token, int page, int num, int net_type, Action<bool, WWW> call_back)
+    {
+        WWWForm www_form = new WWWForm();
+        www_form.AddField("cmd", "user_wallet.listss");
+        www_form.AddField("uid", uid);
+        www_form.AddField("token", token);
+        www_form.AddField("page", page);
+        www_form.AddField("num", num);
+        www_form.AddField("net_type", net_type);
+
+        StartCoroutine(HTTP_post("/apic_user.php", www_form, call_back));
+    }
+
+    public void walletNotify(string uid, string token, string txid, int net_type, Action<bool, WWW> call_back)
+    {
+        WWWForm www_form = new WWWForm();
+        www_form.AddField("cmd", "user_wallet.notify");
+        www_form.AddField("uid", uid);
+        www_form.AddField("token", token);
+        www_form.AddField("txid", txid);
+        www_form.AddField("net_type", net_type);
+
+        StartCoroutine(HTTP_post("/apic_user.php", www_form, call_back));
+    }
+
+    public void getAppWalletNotifys(string uid, string token, string g_id, int net_type, Action<bool, WWW> call_back)
+    {
+        WWWForm www_form = new WWWForm();
+        www_form.AddField("cmd", "user_wallet.get_notify");
+        www_form.AddField("uid", uid);
+        www_form.AddField("token", token);
+        www_form.AddField("g_id", g_id);
+        www_form.AddField("net_type", net_type);
+
+        StartCoroutine(HTTP_post("/apic_user.php", www_form, call_back));
+    }
+
+    public void getPlatWalletNotifys(string uid, string token, int net_type, Action<bool, WWW> call_back)
+    {
+        WWWForm www_form = new WWWForm();
+        www_form.AddField("cmd", "user_wallet.get_notify_plat");
+        www_form.AddField("uid", uid);
+        www_form.AddField("token", token);
+        www_form.AddField("net_type", net_type);
+
+        StartCoroutine(HTTP_post("/apic_user.php", www_form, call_back));
+    }
+
+    public void walletNotifyExt(string uid, string token, string txid, string ext, int net_type, Action<bool, WWW> call_back)
+    {
+        WWWForm www_form = new WWWForm();
+        www_form.AddField("cmd", "user_wallet.notify_ext");
+        www_form.AddField("uid", uid);
+        www_form.AddField("token", token);
+        www_form.AddField("txid", txid);
+        www_form.AddField("ext", ext);
+        www_form.AddField("net_type", net_type);
+
+        StartCoroutine(HTTP_post("/apic_user.php", www_form, call_back));
+    }
+
 
     public void wallet_load(string file)
     {
@@ -170,7 +231,7 @@ public class api_tool : MonoBehaviour
         WWW www = new WWW("file://" + fileName);
         Debug.Log(www.url);
         yield return www;
-
+        
         callback_wallet_load(www);
     }
 
