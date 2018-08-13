@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 static public class global
 {
@@ -12,4 +13,31 @@ static public class global
     static public string id_sgas = "0x2761020e5e6dfcd8d37fdd50ff98fa0f93bccf54";
     static public int game_id = 7;
     static public int netType = 2;  //2为测试网
+
+    public static string unicodeToStr(string str)
+    {
+
+        string outStr = "";
+        string a = "";
+
+        if (!string.IsNullOrEmpty(str))
+        {
+            for (int i = 0; i < str.Length; i++)
+            {
+                a = str[i].ToString();
+                if (Regex.IsMatch(a, "u") && i + 5 <= str.Length)
+                {
+                    a = str.Substring(i + 1, 4);
+                    outStr += (char)int.Parse(a, System.Globalization.NumberStyles.HexNumber);
+                    i += 4;
+                }
+                else
+                {
+                    outStr += str[i];
+
+                }
+            }
+        }
+        return outStr;
+    }
 }

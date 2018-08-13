@@ -52,6 +52,62 @@ public class sdk_http : MonoBehaviour
         StartCoroutine(HTTP_nel_post(www_form, on_get_balance));
     }
 
+    public void invokescrept(Action<bool, WWW> api_cb_cmd, MyJson.JsonNode_Object paparms)
+    {
+        byte[] script = null;
+        using (var sb = new ThinNeo.ScriptBuilder())
+        {
+            sb.EmitParamJson(paparms["sbParamJson"]);//参数倒序入
+            sb.EmitPushString(paparms["sbPushString"].ToString());//参数倒序入
+            ThinNeo.Hash160 shash = new ThinNeo.Hash160(paparms["nnc"].ToString());
+            sb.EmitAppCall(shash);//nep5脚本
+            script = sb.ToArray();
+        }
+
+        WWWForm www_form = Helper.GetWWWFormPost("invokescript", new MyJson.JsonNode_ValueString(ThinNeo.Helper.Bytes2HexString(script)));
+        StartCoroutine(HTTP_nel_post(www_form, api_cb_cmd));
+    }
+
+    public void makeRawTransaction(Action<bool, WWW> api_cb_cmd, MyJson.JsonNode_Array pararms)
+    {
+        if (pararms.Count > 2)
+        {
+            Debug.Log("不支持大于两部的操作");
+            return;
+        }
+
+        byte[] script = null;
+        using (var sb = new ThinNeo.ScriptBuilder())
+        {
+            Debug.Log(pararms.AsList()[0].ToString());
+            sb.EmitParamJson(pararms.AsList()[0].AsDict()["sbParamJson"]);//参数倒序入
+            sb.EmitPushString(pararms.AsList()[0].AsDict()["sbPushString"].ToString());//参数倒序入
+            ThinNeo.Hash160 shash = new ThinNeo.Hash160(pararms.AsList()[0].AsDict()["nnc"].ToString());
+            sb.EmitAppCall(shash);//nep5脚本
+
+            if (pararms.Count > 1)
+            {
+                //这个方法是为了在同一笔交易中转账并充值
+                //当然你也可以分为两笔交易
+                //插入下述两条语句，能得到txid
+                sb.EmitSysCall("System.ExecutionEngine.GetScriptContainer");
+                sb.EmitSysCall("Neo.Transaction.GetHash");
+
+                sb.EmitPushBytes(roleInfo.getInstance().scripthash);
+                sb.EmitPushNumber(2);
+                sb.Emit(ThinNeo.VM.OpCode.PACK);
+
+                sb.EmitPushString(pararms.AsList()[1].AsDict()["sbPushString"].ToString());//参数倒序入
+                ThinNeo.Hash160 shash_2 = new ThinNeo.Hash160(pararms.AsList()[1].AsDict()["nnc"].ToString());
+                sb.EmitAppCall(shash_2);//nep5脚本
+            }
+
+            script = sb.ToArray();
+        }
+
+        StartCoroutine(HTTP_nel_post_tan(script, api_cb_cmd));
+    }
+
     public void api_post_cmd(Action<bool, WWW> api_cb_cmd, string ids, string cmd, string main, string[] arry = null)
     {
     

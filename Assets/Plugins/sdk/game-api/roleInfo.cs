@@ -59,7 +59,8 @@ public class roleInfo
         roleInfo.getInstance().token = json["token"].AsString();
         roleInfo.getInstance().phone = json["phone"].AsString();
         roleInfo.getInstance().phone = json["email"].AsString();
-        roleInfo.getInstance().name = json["name"].AsString();
+
+        roleInfo.getInstance().name = global.unicodeToStr(json["name"].AsString());
         roleInfo.getInstance().wallet = json["wallet"].AsString();
         roleInfo.getInstance().area = json["area"].AsString();
         roleInfo.getInstance().region = json["region"].AsString();

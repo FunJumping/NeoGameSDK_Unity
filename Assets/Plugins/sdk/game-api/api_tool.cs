@@ -216,6 +216,49 @@ public class api_tool : MonoBehaviour
         StartCoroutine(HTTP_post("/apic_user.php", www_form, call_back));
     }
 
+    public void modUserName(string uid, string token, string name, Action<bool, WWW> call_back)
+    {
+        WWWForm www_form = new WWWForm();
+        www_form.AddField("cmd", "user.mod_name");
+        www_form.AddField("uid", uid);
+        www_form.AddField("token", token);
+        www_form.AddField("name", name);
+
+        StartCoroutine(HTTP_post("/apic_user.php", www_form, call_back));
+    }
+
+    public void modUserIcon(string uid, string token, string file, Action<bool, WWW> call_back)
+    {
+        WWWForm www_form = new WWWForm();
+        www_form.AddField("cmd", "user_icon.upload");
+        www_form.AddField("uid", uid);
+        www_form.AddField("token", token);
+        www_form.AddField("file", file);
+
+        StartCoroutine(HTTP_post("/apic_user.php", www_form, call_back));
+    }
+
+    public void modUserSex(string uid, string token, string sex, Action<bool, WWW> call_back)
+    {
+        WWWForm www_form = new WWWForm();
+        www_form.AddField("cmd", "user.mod_sex");
+        www_form.AddField("uid", uid);
+        www_form.AddField("token", token);
+        www_form.AddField("sex", sex);
+
+        StartCoroutine(HTTP_post("/apic_user.php", www_form, call_back));
+    }
+
+    public void modUserRegion(string uid, string token, string region, Action<bool, WWW> call_back)
+    {
+        WWWForm www_form = new WWWForm();
+        www_form.AddField("cmd", "user.mod_region");
+        www_form.AddField("uid", uid);
+        www_form.AddField("token", token);
+        www_form.AddField("region", region);
+
+        StartCoroutine(HTTP_post("/apic_user.php", www_form, call_back));
+    }
 
     public void wallet_load(string file)
     {

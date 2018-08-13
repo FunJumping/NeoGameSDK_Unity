@@ -13,8 +13,18 @@ public class ui_roleinfo : basePanel
             hide();
             testtool.panel_main.show();
         });
+        m_panel.FindChild("panel_change_name/close").GetComponent<Button>().onClick.AddListener(() =>
+        {
+            m_panel.FindChild("panel_change_name").gameObject.SetActive(false);
+        });
+        m_panel.FindChild("panel_change_name/ok").GetComponent<Button>().onClick.AddListener(on_change_name);
+        m_panel.FindChild("change_name").GetComponent<Button>().onClick.AddListener(() =>
+        {
+            m_panel.FindChild("panel_change_name").gameObject.SetActive(true);
+        });
 
         m_panel.FindChild("loginout").GetComponent<Button>().onClick.AddListener(onLoginOut);
+       
     }
 
     public override void show()
@@ -37,5 +47,13 @@ public class ui_roleinfo : basePanel
         testtool.panel_login.show();
         roleInfo.getInstance().dispose_storage();
         NeoGameSDK_CS.api_cb_loginout();
+    }
+
+    public void on_change_name()
+    {
+        string txt_name = m_panel.FindChild("panel_change_name/name").GetComponent<InputField>().text;
+        api_tool._instance.modUserName(roleInfo.getInstance().uid, roleInfo.getInstance().token, txt_name,
+            (bool timeout, WWW www) => { roleInfo.getInstance().name = txt_name; refreshInfo(); });
+        m_panel.FindChild("panel_change_name").gameObject.SetActive(false);
     }
 }
