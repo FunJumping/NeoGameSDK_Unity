@@ -12,6 +12,7 @@ public class test : MonoBehaviour {
     {
         Debug.Log("uid:" + one.uid + " token:" + one.token + " wallet:" + one.wallet);
 
+        //test_recharge_gamesgas();
         //test_getAuctionSgas();
         //test_rechargeToken();
         //test_drawToken();
@@ -26,10 +27,11 @@ public class test : MonoBehaviour {
     }
 
     //sgas充值成游戏币
-    void test_recharge()
+    void test_recharge_gamesgas()
     {
-
+        NeoGameSDK_CS.recharge(1);
     }
+
 
     //市场合约余额测试
     void test_getAuctionSgas()
@@ -121,8 +123,6 @@ public class test : MonoBehaviour {
 
         NeoGameSDK_CS.makeRawTransaction((bool timeout, WWW www) => { Debug.Log(www.text); }, paparms);
     }
-
-
 
     // Update is called once per frame
     void Update () {

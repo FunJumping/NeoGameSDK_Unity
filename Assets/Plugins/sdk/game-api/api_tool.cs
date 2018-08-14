@@ -7,8 +7,9 @@ public class api_tool : MonoBehaviour
 {
     static public api_tool _instance = null;
     //黑猫后台请求地址
-    string m_lancfg_hostUrl = "http://10.1.8.132/new/nel/api_c/apic_user.php";
-    //string m_lancfg_hostUrl = "http://182.254.139.130/apic/";
+    //string m_lancfg_hostUrl = "http://10.1.8.132/new/nel/api_c/apic_user.php";
+    string m_lancfg_hostUrl = "http://api00.9191wyx.com/apic_v2/";
+
     void Start()
     {
         _instance = this;

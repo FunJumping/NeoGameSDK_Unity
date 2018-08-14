@@ -496,6 +496,13 @@ public class sdk_http : MonoBehaviour
                 api_tool._instance.addUserWalletLogs(roleInfo.getInstance().uid, roleInfo.getInstance().token, txid,
                     global.game_id.ToString(), num.ToString(), "3", paparms, global.netType, "0",
                     (bool timeout1, WWW www1) => { testtool.panel_main.on_refresh_WalletListss(); });
+
+                NeoGameSDK_pay_data data = new NeoGameSDK_pay_data();
+                data.uid = roleInfo.getInstance().uid;
+                data.token = roleInfo.getInstance().token;
+                data.cnts = num.ToString();
+                data.txid = txid;
+                NeoGameSDK_CS.api_cb_pay(data);
             }
             else
             {

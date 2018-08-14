@@ -173,6 +173,9 @@ public class ui_main : basePanel
                 case "2":
                     itemclone.transform.FindChild("sgas").gameObject.SetActive(true);
                     break;
+                case "3":
+                    itemclone.transform.FindChild("sgas").gameObject.SetActive(true);
+                    break;
                 case "5":
                     itemclone.transform.FindChild("tran").gameObject.SetActive(true);
                     break;
@@ -210,7 +213,14 @@ public class ui_main : basePanel
 
                     break;
             }
+
+            string txt_name ="Bla Cat";
+            if (item.AsDict()["name"].ToString() != "null")
+            {
+                txt_name = global.unicodeToStr(item.AsDict()["name"].ToString());
+            }
            
+            itemclone.transform.FindChild("text_main").GetComponent<Text>().text = txt_name;
             itemclone.transform.FindChild("text_do").GetComponent<Text>().text = txt_do;
             itemclone.transform.FindChild("text_num").GetComponent<Text>().text = txt_cnt;
             itemclone.transform.FindChild("text_time").GetComponent<Text>().text = txt_time;

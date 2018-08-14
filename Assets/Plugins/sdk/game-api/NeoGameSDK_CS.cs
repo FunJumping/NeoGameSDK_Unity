@@ -30,6 +30,11 @@ public class NeoGameSDK_CS
         go_login.SetActive(true);
     }
 
+    static public void recharge(decimal num)
+    {
+        sdk_http._instance.recharge_game_sgas(num);
+    }
+
     static public void invokescrept(Action<bool, WWW> func_cmd, MyJson.JsonNode_Object paparms)
     {
         sdk_http._instance.invokescrept(func_cmd, paparms);
