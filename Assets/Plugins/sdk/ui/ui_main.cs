@@ -155,22 +155,41 @@ public class ui_main : basePanel
                 itemclone.transform.SetSiblingIndex(index);
             }
 
-            string txt_cnt = "";
+            string txt_do = "";
+            if (item.AsDict()["params"].ToString().Substring(0, 1) == "[")
+            {
+                txt_do = MyJson.Parse(item.AsDict()["params"].ToString()).AsList()[0].AsDict()["sbPushString"].ToString();
+            }
+            else
+            {
+                txt_do = MyJson.Parse(item.AsDict()["params"].ToString()).AsDict()["sbPushString"].ToString();
+            }
+
             switch (item.AsDict()["type"].ToString())
             {
                 case "1":
                     itemclone.transform.FindChild("sgas").gameObject.SetActive(true);
-                    txt_cnt = "+" + item.AsDict()["cnts"].ToString();
                     break;
                 case "2":
                     itemclone.transform.FindChild("sgas").gameObject.SetActive(true);
-                    txt_cnt = "-" + item.AsDict()["cnts"].ToString();
+                    break;
+                case "5":
+                    itemclone.transform.FindChild("tran").gameObject.SetActive(true);
                     break;
                 case "6":
                     itemclone.transform.FindChild("gas").gameObject.SetActive(true);
-                    txt_cnt = "-" + item.AsDict()["cnts"].ToString();
+
                     break;
 
+            }
+
+            string txt_cnt = "";
+            if (item.AsDict()["cnts"].ToString() != "")
+            {
+                if(item.AsDict()["type"].ToString() == "1"  || (item.AsDict()["type"].ToString() == "5" && item.AsDict()["type_detail"].ToString() == "2"))
+                    txt_cnt = "+" + item.AsDict()["cnts"].ToString();
+                else
+                    txt_cnt = "-" + item.AsDict()["cnts"].ToString();
             }
 
             string txt_time = "";
@@ -191,8 +210,8 @@ public class ui_main : basePanel
 
                     break;
             }
-
-            itemclone.transform.FindChild("text_do").GetComponent<Text>().text = MyJson.Parse(item.AsDict()["params"].ToString()).AsDict()["sbPushString"].ToString();
+           
+            itemclone.transform.FindChild("text_do").GetComponent<Text>().text = txt_do;
             itemclone.transform.FindChild("text_num").GetComponent<Text>().text = txt_cnt;
             itemclone.transform.FindChild("text_time").GetComponent<Text>().text = txt_time;
 

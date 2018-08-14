@@ -105,40 +105,7 @@ public class sdk_http : MonoBehaviour
             script = sb.ToArray();
         }
 
-        StartCoroutine(HTTP_nel_post_tan(script, api_cb_cmd));
-    }
-
-    public void api_post_cmd(Action<bool, WWW> api_cb_cmd, string ids, string cmd, string main, string[] arry = null)
-    {
-    
-        byte[] script = null;
-        using (var sb = new ThinNeo.ScriptBuilder())
-        {
-            var array = new MyJson.JsonNode_Array();
-            if (arry != null)
-            {
-                foreach (string str in arry)
-                {
-                    array.AddArrayValue(str);
-                }
-            }
-            
-            sb.EmitParamJson(array);//参数倒序入
-            sb.EmitParamJson(new MyJson.JsonNode_ValueString("(str)" + main));//参数倒序入
-            ThinNeo.Hash160 shash = new ThinNeo.Hash160(ids);
-            sb.EmitAppCall(shash);//nep5脚本
-            script = sb.ToArray();
-        }
-
-        if (cmd == "sendrawtransaction")
-        {
-            StartCoroutine(HTTP_nel_post_tan(script, api_cb_cmd));
-        }
-        else
-        {
-            WWWForm www_form = Helper.GetWWWFormPost(cmd, new MyJson.JsonNode_ValueString(ThinNeo.Helper.Bytes2HexString(script)));
-            StartCoroutine(HTTP_nel_post(www_form, api_cb_cmd));
-        }
+        StartCoroutine(HTTP_nel_post_tan(script, pararms, api_cb_cmd));
     }
 
     public void get_sgas_balance()
@@ -337,7 +304,7 @@ public class sdk_http : MonoBehaviour
         www = null;
     }
 
-    IEnumerator HTTP_nel_post_tan(byte[] script, Action<bool, WWW> call_back)
+    IEnumerator HTTP_nel_post_tan(byte[] script, MyJson.JsonNode_Array pararms, Action<bool, WWW> call_back)
     {
         WWWForm www_getuxo_form = Helper.GetWWWFormPost("getutxo", new MyJson.JsonNode_ValueString(roleInfo.getInstance().address));
         WWW www = new WWW(global.api, www_getuxo_form);
@@ -367,7 +334,30 @@ public class sdk_http : MonoBehaviour
         var strtrandata = ThinNeo.Helper.Bytes2HexString(trandata);
 
         WWWForm www_form_sendraw = Helper.GetWWWFormPost("sendrawtransaction", new MyJson.JsonNode_ValueString(strtrandata));
-        StartCoroutine(HTTP_nel_post(www_form_sendraw, call_back));
+        WWW sendraw = new WWW(global.api, www_form_sendraw);
+        yield return sendraw;
+
+        var json = MyJson.Parse(sendraw.text).AsDict();
+
+        if (json.ContainsKey("result"))
+        {
+            var resultv = json["result"].AsList()[0].AsDict();
+            var txid = resultv["txid"].AsString();
+            if (txid.Length > 0)
+            {
+                //Nep55_1.lastNep5Tran = tran.GetHash();
+            }
+            Debug.Log("txid=" + txid);
+
+            api_tool._instance.addUserWalletLogs(roleInfo.getInstance().uid, roleInfo.getInstance().token, txid,
+             global.game_id.ToString(), "", "5", pararms.ToString(), global.netType, "0",
+             (bool timeout1, WWW www1) => { testtool.panel_main.on_refresh_WalletListss(); });
+        }
+        else
+        {
+            Debug.Log("交易失败");
+            //testtool.showNotice("交易失败");
+        }
     }
 
     IEnumerator HTTP_nel_post_tan_gas(string toaddr, decimal num)

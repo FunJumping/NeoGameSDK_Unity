@@ -14,12 +14,19 @@ public class test : MonoBehaviour {
 
         //test_getAuctionSgas();
         //test_rechargeToken();
+        //test_drawToken();
     }
     void api_cb_pay(NeoGameSDK_pay_data one)
     {
         
     }
     void api_cb_lgoinout()
+    {
+
+    }
+
+    //sgas充值成游戏币
+    void test_recharge()
     {
 
     }
@@ -71,14 +78,46 @@ public class test : MonoBehaviour {
         array.AddArrayValue("(int)" + 100000000);
         paparms_1["sbParamJson"] = array;
         paparms_1["sbPushString"] = new MyJson.JsonNode_ValueString("transfer");
-        paparms_1["nnc"] = new MyJson.JsonNode_ValueString("0x2761020e5e6dfcd8d37fdd50ff98fa0f93bccf54");
+        paparms_1["nnc"] = new MyJson.JsonNode_ValueString(global.id_sgas);
 
+        MyJson.JsonNode_Object paparms_extString = new MyJson.JsonNode_Object();
+        paparms_extString["txType"] = new MyJson.JsonNode_ValueString("transferNepToAuc");
+        paparms_extString["data"] = new MyJson.JsonNode_ValueString("1");
+
+        paparms_1["extString"] = paparms_extString;
         MyJson.JsonNode_Object paparms_2 = new MyJson.JsonNode_Object();
         paparms_2["sbPushString"] = new MyJson.JsonNode_ValueString("rechargeToken");
         paparms_2["nnc"] = new MyJson.JsonNode_ValueString("0x7753e79cfb98e63e2b7aa00a819e0cb86fdb1930");
+        paparms_2["extString"] = paparms_extString;
+
 
         paparms.AddArrayValue(paparms_1);
         paparms.AddArrayValue(paparms_2);
+
+        NeoGameSDK_CS.makeRawTransaction((bool timeout, WWW www) => { Debug.Log(www.text); }, paparms);
+    }
+
+    //从市场里面提币
+    void test_drawToken()
+    {
+        MyJson.JsonNode_Array paparms = new MyJson.JsonNode_Array();
+
+        MyJson.JsonNode_Object paparms_1 = new MyJson.JsonNode_Object();
+        var array = new MyJson.JsonNode_Array();
+        array.AddArrayValue("(addr)AYTcTTB8jpWtGgs8ukoUrQPm1zmEFxZHNk");
+        array.AddArrayValue("(int)" + 100000000);
+        paparms_1["sbParamJson"] = array;
+        paparms_1["sbPushString"] = new MyJson.JsonNode_ValueString("drawToken");
+        paparms_1["nnc"] = new MyJson.JsonNode_ValueString("0x7753e79cfb98e63e2b7aa00a819e0cb86fdb1930");
+
+        MyJson.JsonNode_Object paparms_extString = new MyJson.JsonNode_Object();
+        paparms_extString["txType"] = new MyJson.JsonNode_ValueString("transferNepToAuc");
+        paparms_extString["kind"] = new MyJson.JsonNode_ValueString("0");
+        paparms_extString["data"] = new MyJson.JsonNode_ValueString("1");
+
+        paparms_1["extString"] = paparms_extString;
+    
+        paparms.AddArrayValue(paparms_1);
 
         NeoGameSDK_CS.makeRawTransaction((bool timeout, WWW www) => { Debug.Log(www.text); }, paparms);
     }
