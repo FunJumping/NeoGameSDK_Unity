@@ -6,9 +6,7 @@ using System;
 public class sdk_http : MonoBehaviour
 {
     static public sdk_http _instance = null;
-    //黑猫后台请求地址
-    string m_lancfg_hostUrl = "http://10.1.8.132/new/nel/api_c/apic_user.php";
-    //string m_lancfg_hostUrl = "http://182.254.139.130/apic/";
+   
     void Start()
     {
         _instance = this;
@@ -446,8 +444,7 @@ public class sdk_http : MonoBehaviour
                 var array = new MyJson.JsonNode_Array();
                 array.AddArrayValue("(addr)" + roleInfo.getInstance().address);//from
                 array.AddArrayValue("(addr)" + global.cp_adress);//to
-                array.AddArrayValue("(int)" + (num * 100000000));//value
-
+                array.AddArrayValue("(int)" + Decimal.ToInt32(num * 100000000));//value
                 sb.EmitParamJson(array);//参数倒序入
                 sb.EmitParamJson(new MyJson.JsonNode_ValueString("(str)transfer"));//参数倒序入
                 ThinNeo.Hash160 shash = new ThinNeo.Hash160(global.id_sgas);

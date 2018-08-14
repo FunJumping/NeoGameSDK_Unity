@@ -29,7 +29,7 @@ public class test : MonoBehaviour {
     //sgas充值成游戏币
     void test_recharge_gamesgas()
     {
-        NeoGameSDK_CS.recharge(1);
+        NeoGameSDK_CS.recharge(decimal.Parse("0.1"));
     }
 
 
