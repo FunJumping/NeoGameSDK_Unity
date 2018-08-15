@@ -5,8 +5,16 @@ public class test : MonoBehaviour {
 
 	void Start () {
         NeoGameSDK_CS.init(7, api_cb_login, api_cb_pay, api_cb_lgoinout);
-        NeoGameSDK_CS.login();
+
+        //调用登入最快必须在初始化结束之后
+        StartCoroutine(do_login());
+        
 	}
+    IEnumerator do_login()
+    {
+        yield return new WaitForEndOfFrame();
+        NeoGameSDK_CS.login();
+    }
 
     void api_cb_login(NeoGameSDK_login_data one)
     {

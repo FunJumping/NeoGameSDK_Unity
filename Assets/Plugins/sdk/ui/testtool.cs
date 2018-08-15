@@ -16,6 +16,7 @@ public class testtool : MonoBehaviour
     static public ui_notice panel_notice;
     static public ui_roleinfo panel_roleinfo;
     static public ui_addressCode panel_address_code;
+    static public ui_findPassword panel_findPassword;
 
     static Text txt_notcie;
 
@@ -34,13 +35,14 @@ public class testtool : MonoBehaviour
         panel_notice = new ui_notice(this.transform.FindChild("main_ui/notice"));
         panel_roleinfo = new ui_roleinfo(this.transform.FindChild("main_ui/roleinfo"));
         panel_address_code = new ui_addressCode(this.transform.FindChild("main_ui/adressCode"));
+        panel_findPassword = new ui_findPassword(this.transform.FindChild("main_ui/findPassword"));
 
         btn_main = this.transform.FindChild("btn_main").GetComponent<Button>();
         btn_main.onClick.AddListener(onMainPanelCtr);
     }
 
     bool mainPanel_show = true;
-    void onMainPanelCtr()
+    public void onMainPanelCtr()
     {
         if (mainPanel_show)
         {

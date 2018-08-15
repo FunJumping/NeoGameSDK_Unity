@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Collections;
 using UnityEngine;
 
 public class NeoGameSDK_CS
@@ -27,7 +28,18 @@ public class NeoGameSDK_CS
     }
     static public void login()
     {
-        go_login.SetActive(true);
+        if (PlayerPrefs.HasKey("uid") && PlayerPrefs.HasKey("token") && PlayerPrefs.GetString("uid") != "" && PlayerPrefs.GetString("token") != "")
+        {
+            api_tool._instance.isLogined(PlayerPrefs.GetString("uid"), PlayerPrefs.GetString("token"), (bool timeout, WWW www) =>
+            {
+                testtool.panel_login.on_user_login(timeout, www);
+            });
+        }
+        else
+        {
+            testtool.panel_login.show();
+        }
+            go_login.SetActive(true);
     }
 
     static public void recharge(decimal num)

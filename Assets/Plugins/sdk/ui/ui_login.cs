@@ -15,6 +15,10 @@ public class ui_login : basePanel
         m_panel.FindChild("login").GetComponent<Button>().onClick.AddListener(on_login);
         m_panel.FindChild("register").GetComponent<Button>().onClick.AddListener(on_register);
 
+        m_panel.FindChild("panel_phone/passward/getnew").GetComponent<Button>().onClick.AddListener(on_foggetPassword);
+        m_panel.FindChild("panel_user/passward/getnew").GetComponent<Button>().onClick.AddListener(on_foggetPassword);
+        m_panel.FindChild("panel_email/passward/getnew").GetComponent<Button>().onClick.AddListener(on_foggetPassword);
+
         on_tab_user();
     }
 
@@ -22,6 +26,12 @@ public class ui_login : basePanel
     {
         hide();
         testtool.panel_register.show();
+    }
+
+    void on_foggetPassword()
+    {
+        hide();
+        testtool.panel_findPassword.show();
     }
 
     public string getphone_group()

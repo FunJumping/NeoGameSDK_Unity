@@ -349,7 +349,7 @@ public class sdk_http : MonoBehaviour
 
             api_tool._instance.addUserWalletLogs(roleInfo.getInstance().uid, roleInfo.getInstance().token, txid,
              global.game_id.ToString(), "", "5", pararms.ToString(), global.netType, "0",
-             (bool timeout1, WWW www1) => { testtool.panel_main.on_refresh_WalletListss(); });
+             (bool timeout1, WWW www1) => { testtool.panel_main.on_refresh_WalletListss(); call_back(timeout1, www1); });
         }
         else
         {

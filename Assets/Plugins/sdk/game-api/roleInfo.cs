@@ -92,6 +92,7 @@ public class roleInfo
     public void set_storage(string wif)
     {
         PlayerPrefs.SetString("uid", uid);
+        PlayerPrefs.SetString("token",token);
         PlayerPrefs.SetString("wif", wif);
 
         roleInfo.getInstance().prikey = ThinNeo.Helper.GetPrivateKeyFromWIF(wif);
@@ -103,6 +104,7 @@ public class roleInfo
     public void dispose_storage()
     {
         PlayerPrefs.DeleteKey("uid");
+        PlayerPrefs.DeleteKey("token");
         PlayerPrefs.DeleteKey("wif");
     }
 }

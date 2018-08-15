@@ -30,18 +30,40 @@ public class api_tool : MonoBehaviour
         StartCoroutine(HTTP_post("/apic_user.php", www_form, call_back));
     }
 
-    public void validPhone(string phone, Action<bool, WWW> call_back)
+    public void validPhone(string phone, Action<bool, WWW> call_back, bool showError = true)
     {
         WWWForm www_form = new WWWForm();
         www_form.AddField("cmd", "user_phone.valid_register");
         www_form.AddField("phone", phone);
-        StartCoroutine(HTTP_post("/apic_user.php", www_form, call_back));
+        StartCoroutine(HTTP_post("/apic_user.php", www_form, call_back, showError));
     }
-    public void validEmail(string email, Action<bool, WWW> call_back)
+    public void validEmail(string email, Action<bool, WWW> call_back, bool showError = true)
     {
         WWWForm www_form = new WWWForm();
         www_form.AddField("cmd", "user_email.valid_register");
         www_form.AddField("email", email);
+        StartCoroutine(HTTP_post("/apic_user.php", www_form, call_back, showError));
+    }
+
+    public void forgetPassByPhone(string phone, string code, string passward, Action<bool, WWW> call_back)
+    {
+        WWWForm www_form = new WWWForm();
+        www_form.AddField("cmd", "user_phone.mod_pwd");
+        www_form.AddField("phone", phone);
+        www_form.AddField("code", code);
+        www_form.AddField("new_pwd", passward);
+      
+        StartCoroutine(HTTP_post("/apic_user.php", www_form, call_back));
+    }
+
+    public void forgetPassByEmail(string email, string code, string passward, Action<bool, WWW> call_back)
+    {
+        WWWForm www_form = new WWWForm();
+        www_form.AddField("cmd", "user_email.mod_pwd");
+        www_form.AddField("email", email);
+        www_form.AddField("code", code);
+        www_form.AddField("new_pwd", passward);
+
         StartCoroutine(HTTP_post("/apic_user.php", www_form, call_back));
     }
 
@@ -280,14 +302,19 @@ public class api_tool : MonoBehaviour
     }
 
 
-    public bool check_www_result(WWW www)
+    public bool check_www_result(WWW www, bool showError = true)
     {
         Debug.Log(www.text);
         var r = MyJson.Parse(www.text).AsDict()["r"].AsInt();
         if (r == 0)
         {
-            testtool.on_error_notice(MyJson.Parse(www.text).AsDict()["errCode"].AsInt());
-            return false;
+            if (showError)
+            {
+                testtool.on_error_notice(MyJson.Parse(www.text).AsDict()["errCode"].AsInt());
+                return false;
+            }
+            else
+                return true;
         }
         else if (r == 1)
             return true;
@@ -295,7 +322,7 @@ public class api_tool : MonoBehaviour
             return false;
     }
 
-    IEnumerator HTTP_post(string url, WWWForm www_form, Action<bool, WWW> call_back) //请求黑猫后台
+    IEnumerator HTTP_post(string url, WWWForm www_form, Action<bool, WWW> call_back, bool showError = true) //请求黑猫后台
     {
         WWW www = new WWW(m_lancfg_hostUrl + url, www_form);
 
@@ -308,7 +335,7 @@ public class api_tool : MonoBehaviour
             yield return null;
         }
 
-        if (check_www_result(www) && call_back!= null)
+        if (check_www_result(www, showError) && call_back!= null)
             call_back(time_out, www);
 
         www.Dispose();
