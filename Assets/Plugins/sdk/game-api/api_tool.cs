@@ -21,13 +21,13 @@ public class api_tool : MonoBehaviour
 
     }
 
-    public void isLogined(string uid, string token, Action<bool, WWW> call_back)
+    public void isLogined(string uid, string token, Action<bool, WWW> call_back, bool showError = true)
     {
         WWWForm www_form = new WWWForm();
         www_form.AddField("cmd", "user.isLogined");
         www_form.AddField("uid", uid);
         www_form.AddField("token", token);
-        StartCoroutine(HTTP_post("/apic_user.php", www_form, call_back));
+        StartCoroutine(HTTP_post("/apic_user.php", www_form, call_back, showError));
     }
 
     public void validPhone(string phone, Action<bool, WWW> call_back, bool showError = true)

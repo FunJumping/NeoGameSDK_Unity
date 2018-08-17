@@ -32,14 +32,18 @@ public class NeoGameSDK_CS
         {
             api_tool._instance.isLogined(PlayerPrefs.GetString("uid"), PlayerPrefs.GetString("token"), (bool timeout, WWW www) =>
             {
-                testtool.panel_login.on_user_login(timeout, www);
-            });
+                var r = MyJson.Parse(www.text).AsDict()["r"].AsInt();
+                if (r == 1)
+                    testtool.panel_login.on_user_login(timeout, www);
+                else
+                    testtool.panel_login.show();
+            }, false);
         }
         else
         {
             testtool.panel_login.show();
         }
-            go_login.SetActive(true);
+        go_login.SetActive(true);
     }
 
     static public void recharge(decimal num)

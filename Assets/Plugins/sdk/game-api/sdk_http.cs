@@ -602,6 +602,8 @@ public class sdk_http : MonoBehaviour
     {
         var nep55_shash = new ThinNeo.Hash160(global.id_sgas);
         string nep55_address = ThinNeo.Helper.GetAddressFromScriptHash(nep55_shash);
+        var scripthash = ThinNeo.Helper.GetPublicKeyHashFromAddress(roleInfo.getInstance().address);
+
 
         WWWForm www_getuxo_form = Helper.GetWWWFormPost("getutxo", new MyJson.JsonNode_ValueString(nep55_address));
         WWW www = new WWW(global.api, www_getuxo_form);
@@ -640,6 +642,7 @@ public class sdk_http : MonoBehaviour
             var jsonCU = MyJson.Parse(www_form.text);
             var stack = jsonCU.AsDict()["result"].AsList()[0].AsDict()["stack"].AsList()[0].AsDict();
             var value = stack["value"].AsString();
+
             if (value.Length > 0)//已经标记的UTXO，不能使用
             {
                 newlist.RemoveAt(i);
@@ -654,7 +657,7 @@ public class sdk_http : MonoBehaviour
             using (var sb = new ThinNeo.ScriptBuilder())
             {
                 var array = new MyJson.JsonNode_Array();
-                array.AddArrayValue("(bytes)" + ThinNeo.Helper.Bytes2HexString(roleInfo.getInstance().scripthash));
+                array.AddArrayValue("(bytes)" + ThinNeo.Helper.Bytes2HexString(scripthash));
                 sb.EmitParamJson(array);//参数倒序入
                 sb.EmitParamJson(new MyJson.JsonNode_ValueString("(str)refund"));//参数倒序入
                 var shash = new ThinNeo.Hash160(global.id_sgas);
@@ -683,7 +686,12 @@ public class sdk_http : MonoBehaviour
             tran.attributes = new ThinNeo.Attribute[1];
             tran.attributes[0] = new ThinNeo.Attribute();
             tran.attributes[0].usage = ThinNeo.TransactionAttributeUsage.Script;
-            tran.attributes[0].data = roleInfo.getInstance().scripthash;
+            tran.attributes[0].data = scripthash;
+
+            Debug.Log(ThinNeo.Helper.Bytes2HexString(scripthash));
+            Debug.Log(ThinNeo.Helper.Bytes2HexString(roleInfo.getInstance().prikey));
+            Debug.Log(ThinNeo.Helper.Bytes2HexString(roleInfo.getInstance().pubkey));
+            Debug.Log(roleInfo.getInstance().address);
         }
 
         //sign and broadcast
@@ -694,6 +702,8 @@ public class sdk_http : MonoBehaviour
                 WWW www_state = new WWW(global.api, www_getState);
 
                 yield return www_state;
+
+                Debug.Log(www_state.text);
 
                 var _json = MyJson.Parse(www_state.text).AsDict();
                 var _resultv = _json["result"].AsList()[0].AsDict();
@@ -717,14 +727,10 @@ public class sdk_http : MonoBehaviour
 
         ThinNeo.Transaction testde = new ThinNeo.Transaction();
         testde.Deserialize(new System.IO.MemoryStream(trandata));
-
         WWWForm www_transaction = Helper.GetWWWFormPost("sendrawtransaction", new MyJson.JsonNode_ValueString(strtrandata));
         WWW www_tran = new WWW(global.api, www_transaction);
 
         yield return www_tran;
-
-
-        Debug.Log(www_tran.text);
 
         var json = MyJson.Parse(www_tran.text).AsDict();
 
