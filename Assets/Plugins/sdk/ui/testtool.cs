@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using System.Linq;
 using System;
 using Common;
@@ -19,7 +20,6 @@ public class testtool : MonoBehaviour
     static public ui_findPassword panel_findPassword;
 
     static Text txt_notcie;
-
     GameObject panel_main_ui;
     Button btn_main;
   
@@ -39,11 +39,16 @@ public class testtool : MonoBehaviour
 
         btn_main = this.transform.FindChild("btn_main").GetComponent<Button>();
         btn_main.onClick.AddListener(onMainPanelCtr);
+        panel_main_ui.transform.FindChild("btn_bg").GetComponent<Button>().onClick.AddListener(onMainPanelCtr);
+        EventTriggerListener.Get(btn_main.gameObject).onDrag = OnDrag;
+        EventTriggerListener.Get(btn_main.gameObject).onDragOut = OnDragOut;
     }
 
     bool mainPanel_show = true;
     public void onMainPanelCtr()
     {
+        if (m_moving)
+            return;
         if (mainPanel_show)
         {
             panel_main_ui.SetActive(false);
@@ -57,6 +62,17 @@ public class testtool : MonoBehaviour
 
     }
 
+    bool m_moving = false;
+    void OnDrag(GameObject go, Vector2 delta)
+    {
+        m_moving = true;
+        Debug.Log(delta.x + " " + delta.y);
+        btn_main.transform.localPosition += new Vector3(delta.x, delta.y, 0);
+    }
+    void OnDragOut(GameObject go = null)
+    {
+        m_moving = false;
+    }
 
     // Update is called once per frame
     void Update()

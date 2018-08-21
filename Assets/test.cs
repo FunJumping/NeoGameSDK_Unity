@@ -24,6 +24,7 @@ public class test : MonoBehaviour {
         //test_getAuctionSgas();
         //test_rechargeToken();
         //test_drawToken();
+        //test_setAuctionSgasNnc();
     }
     void api_cb_pay(NeoGameSDK_pay_data one)
     {
@@ -40,6 +41,21 @@ public class test : MonoBehaviour {
         NeoGameSDK_CS.recharge(decimal.Parse("0.1"));
     }
 
+    void test_setAuctionSgasNnc()
+    {
+        MyJson.JsonNode_Array paparms = new MyJson.JsonNode_Array();
+
+        MyJson.JsonNode_Object paparms_1 = new MyJson.JsonNode_Object();
+        var array = new MyJson.JsonNode_Array();
+        array.AddArrayValue("(hex)0x2761020e5e6dfcd8d37fdd50ff98fa0f93bccf54");
+        paparms_1["sbParamJson"] = array;
+        paparms_1["sbPushString"] = new MyJson.JsonNode_ValueString("_setSgas");
+        paparms_1["nnc"] = new MyJson.JsonNode_ValueString("0x7753e79cfb98e63e2b7aa00a819e0cb86fdb1930");
+
+        paparms.AddArrayValue(paparms_1);
+
+        NeoGameSDK_CS.makeRawTransaction((bool timeout, WWW www) => { Debug.Log(www.text); }, paparms);
+    }
 
     //市场合约余额测试
     void test_getAuctionSgas()

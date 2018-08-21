@@ -703,8 +703,6 @@ public class sdk_http : MonoBehaviour
 
                 yield return www_state;
 
-                Debug.Log(www_state.text);
-
                 var _json = MyJson.Parse(www_state.text).AsDict();
                 var _resultv = _json["result"].AsList()[0].AsDict();
                 n55contract = ThinNeo.Helper.HexString2Bytes(_resultv["script"].AsString());
@@ -731,6 +729,8 @@ public class sdk_http : MonoBehaviour
         WWW www_tran = new WWW(global.api, www_transaction);
 
         yield return www_tran;
+
+        Debug.Log(www_tran.text);
 
         var json = MyJson.Parse(www_tran.text).AsDict();
 

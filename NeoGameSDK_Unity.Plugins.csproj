@@ -73,6 +73,7 @@
     <Compile Include="Assets\Plugins\sdk\game-api\sdk_http.cs" />
     <Compile Include="Assets\Plugins\sdk\helper\FileDlg.cs" />
     <Compile Include="Assets\Plugins\sdk\helper\Helper.cs" />
+    <Compile Include="Assets\Plugins\sdk\helper\EventTriggerListener.cs" />
     <Compile Include="Assets\Plugins\sdk\neo-thin\BigInteger\BigInteger.cs" />
     <Compile Include="Assets\Plugins\sdk\neo-thin\BigInteger\Int128.cs" />
     <Compile Include="Assets\Plugins\sdk\neo-thin\BigInteger\Int256.cs" />
